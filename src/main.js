@@ -332,6 +332,6 @@ function analyzeSalesData(data, options) {
 
     representations.push(representation);
   }
-
+  //
   return representations;
 }
