@@ -155,10 +155,12 @@ class GetSellerStatsView {
 
     for (const [seller_id, stats] of Object.entries(seller_stats_map)) {
       const products_sold = Object.entries(stats.products_sold);
-      products_sold.map(([key, value]) => ({ [key]: value }));
-      seller_stats_map[seller_id].products_sold = products_sold;
+      const products_sold_normalized = [];
+      for (const [sku, quantity] of products_sold) {
+        products_sold_normalized.push({ sku: sku, quantity: quantity });
+      }
+      seller_stats_map[seller_id].products_sold = products_sold_normalized;
     }
-
     return Object.values(seller_stats_map);
   }
 }
@@ -312,7 +314,7 @@ function analyzeSalesData(data, options) {
 
   const representations = [];
   for (let seller_stats of seller_stats_list) {
-    seller_stats.products_sold.sort((a, b) => b[1] - a[1]);
+    seller_stats.products_sold.sort((a, b) => b.quantity - a.quantity);
 
     const representation = {
       seller_id: seller_stats.seller.id,
