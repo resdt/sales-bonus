@@ -15,7 +15,6 @@ class OrderLine {
   constructor({ receipt_id, seller_id, customer_id, items, total_amount }) {
     this.receipt_id = receipt_id;
     this.seller_id = seller_id;
-    this.customer_id = customer_id;
     this.items = items;
     this.total_amount = total_amount;
   }
@@ -41,15 +40,15 @@ class Product {
 // ===------------------------------------------------------------------===
 
 class ISellerRepository {
-  get_indexed() {}
+  getIndexed() {}
 }
 
 class IProductRepository {
-  get_indexed() {}
+  getIndexed() {}
 }
 
 class IMarketRepository {
-  get_purchases() {}
+  getPurchases() {}
 }
 
 // ===------------------------------------------------------------------===
@@ -57,11 +56,11 @@ class IMarketRepository {
 // ===------------------------------------------------------------------===
 
 class SellerStats {
-  constructor({ seller, revenue, profit, sales_count, products_sold }) {
+  constructor({ seller, revenue, profit, quantity, products_sold }) {
     this.seller = seller;
     this.revenue = revenue;
     this.profit = profit;
-    this.sales_count = sales_count;
+    this.quantity = quantity;
     this.products_sold = products_sold;
   }
 }
@@ -123,9 +122,9 @@ class GetSellerStatsView {
   }
 
   execute() {
-    const sellers = this.#seller_repo.get_indexed();
-    const purchases = this.#market_repo.get_purchases();
-    const products = this.#product_repo.get_indexed();
+    const sellers = this.#seller_repo.getIndexed();
+    const purchases = this.#market_repo.getPurchases();
+    const products = this.#product_repo.getIndexed();
 
     const seller_stats_map = {};
     for (let order_line of purchases) {
@@ -197,7 +196,7 @@ class MarketLocalDatabase extends IMarketRepository {
     this.#data = data;
   }
 
-  get_purchases() {
+  getPurchases() {
     const purchases = [];
     for (let purchase_data of this.#data.purchase_records) {
       const item_list = [];
@@ -214,7 +213,6 @@ class MarketLocalDatabase extends IMarketRepository {
       const purchase = new OrderLine({
         receipt_id: purchase_data.receipt_id,
         seller_id: purchase_data.seller_id,
-        customer_id: purchase_data.customer_id,
         items: item_list,
         total_amount: purchase_data.total_amount,
       });
@@ -233,7 +231,7 @@ class SellerLocalDatabase extends ISellerRepository {
     this.#data = data;
   }
 
-  get_indexed() {
+  getIndexed() {
     const sellerIndex = {};
     for (let seller_data of this.#data.sellers) {
       const seller = new Seller({
@@ -255,7 +253,7 @@ class ProductLocalDatabase extends IProductRepository {
     this.#data = data;
   }
 
-  get_indexed() {
+  getIndexed() {
     const productIndex = {};
     for (let product_data of this.#data.products) {
       const product = new Product({
@@ -326,7 +324,7 @@ function analyzeSalesData(data, options) {
       name: `${seller_stats.seller.first_name} ${seller_stats.seller.last_name}`,
       revenue: +seller_stats.revenue.toFixed(2),
       profit: +seller_stats.profit.toFixed(2),
-      sales_count: seller_stats.sales_count,
+      quantity: seller_stats.sales_count,
       top_products: seller_stats.products_sold.slice(0, 10),
       bonus: +seller_stats.bonus.toFixed(2),
     };
