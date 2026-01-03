@@ -189,10 +189,6 @@ class MarketLocalDatabase extends IMarketRepository {
   #data;
 
   constructor(data) {
-    if (!data.purchase_records) {
-      throw new NoDataError('No purchase records provided');
-    }
-
     super();
     this.#data = data;
   }
@@ -228,10 +224,6 @@ class SellerLocalDatabase extends ISellerRepository {
   #data;
 
   constructor(data) {
-    if (!data.sellers) {
-      throw new NoDataError('No sellers provided');
-    }
-
     super();
     this.#data = data;
   }
@@ -254,10 +246,6 @@ class ProductLocalDatabase extends IProductRepository {
   #data;
 
   constructor(data) {
-    if (!data.products) {
-      throw new NoDataError('No products provided');
-    }
-
     super();
     this.#data = data;
   }
@@ -288,6 +276,10 @@ class ProductLocalDatabase extends IProductRepository {
 function analyzeSalesData(data, options) {
   if (!data) {
     throw new NoDataError('No data provided');
+  }
+
+  if (!data.purchase_records || data.purchase_records.length == 0) {
+    throw new NoDataError('No purchase data provided');
   }
 
   if (!Array.isArray(data.sellers) || data.sellers.length == 0) {
