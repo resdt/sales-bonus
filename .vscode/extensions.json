@@ -1,0 +1,14 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "ms-vscode.live-server",
+    "ms-vsliveshare.vsliveshare",
+    "streetsidesoftware.code-spell-checker-russian",
+    "dbaeumer.vscode-eslint",
+    "formulahendry.auto-rename-tag",
+    "steoates.autoimport",
+    "kamikillerto.vscode-colorize",
+    "pranaygp.vscode-css-peek",
+    "piyushsarkar.sort-css-properties"
+  ]
+}
