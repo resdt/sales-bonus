@@ -326,11 +326,11 @@ function analyzeSalesData(data, options) {
     sellerStats.productsSold.sort((a, b) => b.quantity - a.quantity);
 
     const representation = {
-      sellerId: sellerStats.seller.id,
+      seller_id: sellerStats.seller.id,
       name: `${sellerStats.seller.firstName} ${sellerStats.seller.lastName}`,
       revenue: +sellerStats.revenue.toFixed(2),
       profit: +sellerStats.profit.toFixed(2),
-      salesCount: sellerStats.salesCount,
+      sales_count: sellerStats.salesCount,
       top_products: sellerStats.productsSold.slice(0, 10),
       bonus: +sellerStats.bonus.toFixed(2),
     };
