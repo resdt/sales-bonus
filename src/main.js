@@ -77,20 +77,21 @@ function calculateBonusByProfit(index, total, seller) {
   const PRIZEWINNER_BONUS_PERCENTAGE = 10;
   const COMMON_BONUS_PERCENTAGE = 5;
 
-  const { profit } = seller;
   const rank = index + 1;
 
-  let bonus;
-  if (rank == 1) {
-    bonus = (profit * WINNER_BONUS_PERCENTAGE) / 100;
-  } else if (rank == 2 || rank == 3) {
-    bonus = (profit * PRIZEWINNER_BONUS_PERCENTAGE) / 100;
-  } else if (rank != total) {
-    bonus = (profit * COMMON_BONUS_PERCENTAGE) / 100;
-  } else {
-    bonus = 0;
+  let percentage = 0;
+  if (rank === 1) {
+    percentage = WINNER_BONUS_PERCENTAGE;
+  } else if (rank === 2 || rank === 3) {
+    percentage = PRIZEWINNER_BONUS_PERCENTAGE;
+  } else if (rank !== total) {
+    percentage = COMMON_BONUS_PERCENTAGE;
   }
-  return bonus;
+
+  const profitInCents = Math.round(seller.profit * 100);
+  const bonusInCents = Math.floor((profitInCents * percentage) / 100);
+
+  return bonusInCents / 100;
 }
 
 /**
