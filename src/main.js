@@ -3,35 +3,35 @@
 // ===------------------------------------------------------------------===
 
 class OrderItem {
-  constructor({ sku, discount, quantity, sale_price }) {
+  constructor({ sku, discount, quantity, salePrice }) {
     this.sku = sku;
     this.discount = discount;
     this.quantity = quantity;
-    this.sale_price = sale_price;
+    this.salePrice = salePrice;
   }
 }
 
 class OrderLine {
-  constructor({ receipt_id, seller_id, customer_id, items, total_amount }) {
-    this.receipt_id = receipt_id;
-    this.seller_id = seller_id;
+  constructor({ receiptId, sellerId, items, totalAmount }) {
+    this.receiptId = receiptId;
+    this.sellerId = sellerId;
     this.items = items;
-    this.total_amount = total_amount;
+    this.totalAmount = totalAmount;
   }
 }
 
 class Seller {
-  constructor({ id, first_name, last_name }) {
+  constructor({ id, firstName, lastName }) {
     this.id = id;
-    this.first_name = first_name;
-    this.last_name = last_name;
+    this.firstName = firstName;
+    this.lastName = lastName;
   }
 }
 
 class Product {
-  constructor({ sku, purchase_price }) {
+  constructor({ sku, purchasePrice }) {
     this.sku = sku;
-    this.purchase_price = purchase_price;
+    this.purchasePrice = purchasePrice;
   }
 }
 
@@ -56,12 +56,12 @@ class IMarketRepository {
 // ===------------------------------------------------------------------===
 
 class SellerStats {
-  constructor({ seller, revenue, profit, sales_count, products_sold }) {
+  constructor({ seller, revenue, profit, salesCount, productsSold }) {
     this.seller = seller;
     this.revenue = revenue;
     this.profit = profit;
-    this.sales_count = sales_count;
-    this.products_sold = products_sold;
+    this.salesCount = salesCount;
+    this.productsSold = productsSold;
   }
 }
 
@@ -99,74 +99,74 @@ function calculateBonusByProfit(index, total, seller) {
  * @returns {number}
  */
 function calculateSimpleRevenue(purchase, _product) {
-  const { discount, sale_price, quantity } = purchase;
+  const { discount, salePrice, quantity } = purchase;
 
   const decimalDiscount = discount / 100;
-  const overallPrice = sale_price * quantity;
+  const overallPrice = salePrice * quantity;
   const revenue = overallPrice * (1 - decimalDiscount);
 
   return revenue;
 }
 
 class GetSellerStatsView {
-  #seller_repo;
-  #market_repo;
-  #product_repo;
-  #revenue_callback;
+  #sellerRepo;
+  #marketRepo;
+  #productRepo;
+  #revenueCallback;
 
-  constructor({ seller_repo, market_repo, product_repo, revenue_callback }) {
-    this.#seller_repo = seller_repo;
-    this.#market_repo = market_repo;
-    this.#product_repo = product_repo;
-    this.#revenue_callback = revenue_callback;
+  constructor({ sellerRepo, marketRepo, productRepo, revenueCallback }) {
+    this.#sellerRepo = sellerRepo;
+    this.#marketRepo = marketRepo;
+    this.#productRepo = productRepo;
+    this.#revenueCallback = revenueCallback;
   }
 
   execute() {
-    const sellers = this.#seller_repo.getIndexed();
-    const purchases = this.#market_repo.getPurchases();
-    const products = this.#product_repo.getIndexed();
+    const sellers = this.#sellerRepo.getIndexed();
+    const purchases = this.#marketRepo.getPurchases();
+    const products = this.#productRepo.getIndexed();
 
-    const seller_stats_map = {};
-    for (let order_line of purchases) {
-      if (!(order_line.seller_id in seller_stats_map)) {
-        const seller_stats = new SellerStats({
-          seller: sellers[order_line.seller_id],
+    const sellerStatsMap = {};
+    for (const orderLine of purchases) {
+      if (!(orderLine.sellerId in sellerStatsMap)) {
+        const sellerStats = new SellerStats({
+          seller: sellers[orderLine.sellerId],
           revenue: 0,
           profit: 0,
-          sales_count: 0,
-          products_sold: {},
+          salesCount: 0,
+          productsSold: {},
         });
-        seller_stats_map[seller_stats.seller.id] = seller_stats;
+        sellerStatsMap[sellerStats.seller.id] = sellerStats;
       }
 
-      const seller_stats = seller_stats_map[order_line.seller_id];
-      seller_stats.sales_count++;
-      seller_stats.revenue += order_line.total_amount;
+      const sellerStats = sellerStatsMap[orderLine.sellerId];
+      sellerStats.salesCount++;
+      sellerStats.revenue += orderLine.totalAmount;
 
-      const items = order_line.items;
-      for (let item of items) {
-        const revenue = this.#revenue_callback(item);
-        const investments = products[item.sku].purchase_price * item.quantity;
+      const items = orderLine.items;
+      for (const item of items) {
+        const revenue = this.#revenueCallback(item);
+        const investments = products[item.sku].purchasePrice * item.quantity;
 
-        seller_stats.profit += revenue - investments;
+        sellerStats.profit += revenue - investments;
 
-        if (!(item.sku in seller_stats.products_sold)) {
-          seller_stats.products_sold[item.sku] = 0;
+        if (!(item.sku in sellerStats.productsSold)) {
+          sellerStats.productsSold[item.sku] = 0;
         }
 
-        seller_stats.products_sold[item.sku] += item.quantity;
+        sellerStats.productsSold[item.sku] += item.quantity;
       }
     }
 
-    for (const [seller_id, stats] of Object.entries(seller_stats_map)) {
-      const products_sold = Object.entries(stats.products_sold);
-      const products_sold_normalized = [];
-      for (const [sku, quantity] of products_sold) {
-        products_sold_normalized.push({ sku: sku, quantity: quantity });
+    for (const [sellerId, stats] of Object.entries(sellerStatsMap)) {
+      const productsSold = Object.entries(stats.productsSold);
+      const productsSoldNormalized = [];
+      for (const [sku, quantity] of productsSold) {
+        productsSoldNormalized.push({ sku: sku, quantity: quantity });
       }
-      seller_stats_map[seller_id].products_sold = products_sold_normalized;
+      sellerStatsMap[sellerId].productsSold = productsSoldNormalized;
     }
-    return Object.values(seller_stats_map);
+    return Object.values(sellerStatsMap);
   }
 }
 
@@ -200,23 +200,23 @@ class MarketLocalDatabase extends IMarketRepository {
 
   getPurchases() {
     const purchases = [];
-    for (let purchase_data of this.#data.purchase_records) {
-      const item_list = [];
-      for (let item_data of purchase_data.items) {
-        const order_item = new OrderItem({
-          sku: item_data.sku,
-          quantity: item_data.quantity,
-          sale_price: item_data.sale_price,
-          discount: item_data.discount,
+    for (const purchaseData of this.#data.purchase_records) {
+      const itemList = [];
+      for (const itemData of purchaseData.items) {
+        const orderItem = new OrderItem({
+          sku: itemData.sku,
+          quantity: itemData.quantity,
+          salePrice: itemData.sale_price,
+          discount: itemData.discount,
         });
-        item_list.push(order_item);
+        itemList.push(orderItem);
       }
 
       const purchase = new OrderLine({
-        receipt_id: purchase_data.receipt_id,
-        seller_id: purchase_data.seller_id,
-        items: item_list,
-        total_amount: purchase_data.total_amount,
+        receiptId: purchaseData.receipt_id,
+        sellerId: purchaseData.seller_id,
+        items: itemList,
+        totalAmount: purchaseData.total_amount,
       });
       purchases.push(purchase);
     }
@@ -235,11 +235,11 @@ class SellerLocalDatabase extends ISellerRepository {
 
   getIndexed() {
     const sellerIndex = {};
-    for (let seller_data of this.#data.sellers) {
+    for (const sellerData of this.#data.sellers) {
       const seller = new Seller({
-        id: seller_data.id,
-        first_name: seller_data.first_name,
-        last_name: seller_data.last_name,
+        id: sellerData.id,
+        firstName: sellerData.first_name,
+        lastName: sellerData.last_name,
       });
       sellerIndex[seller.id] = seller;
     }
@@ -257,10 +257,10 @@ class ProductLocalDatabase extends IProductRepository {
 
   getIndexed() {
     const productIndex = {};
-    for (let product_data of this.#data.products) {
+    for (const productData of this.#data.products) {
       const product = new Product({
-        sku: product_data.sku,
-        purchase_price: product_data.purchase_price,
+        sku: productData.sku,
+        purchasePrice: productData.purchase_price,
       });
       productIndex[product.sku] = product;
     }
@@ -276,7 +276,7 @@ class ProductLocalDatabase extends IProductRepository {
  * Функция для анализа данных продаж
  * @param data
  * @param options
- * @returns {{revenue, top_products, bonus, name, sales_count, profit, seller_id}[]}
+ * @returns {{revenue, top_products, bonus, name, salesCount, profit, sellerId}[]}
  */
 function analyzeSalesData(data, options) {
   if (!data) {
@@ -300,35 +300,35 @@ function analyzeSalesData(data, options) {
     throw new InvalidDataError('Invalid functions provided');
   }
 
-  const seller_repo = new SellerLocalDatabase(data);
-  const market_repo = new MarketLocalDatabase(data);
-  const product_repo = new ProductLocalDatabase(data);
+  const sellerRepo = new SellerLocalDatabase(data);
+  const marketRepo = new MarketLocalDatabase(data);
+  const productRepo = new ProductLocalDatabase(data);
 
-  let uc = new GetSellerStatsView({
-    seller_repo: seller_repo,
-    market_repo: market_repo,
-    product_repo: product_repo,
-    revenue_callback: calculateRevenue,
+  const uc = new GetSellerStatsView({
+    sellerRepo: sellerRepo,
+    marketRepo: marketRepo,
+    productRepo: productRepo,
+    revenueCallback: calculateRevenue,
   });
-  const seller_stats_list = uc.execute();
-  seller_stats_list.sort((a, b) => b.profit - a.profit);
+  const sellerStatsList = uc.execute();
+  sellerStatsList.sort((a, b) => b.profit - a.profit);
 
-  seller_stats_list.map((value, index) => {
-    value.bonus = calculateBonus(index, seller_stats_list.length, value);
+  sellerStatsList.map((value, index) => {
+    value.bonus = calculateBonus(index, sellerStatsList.length, value);
   });
 
   const representations = [];
-  for (let seller_stats of seller_stats_list) {
-    seller_stats.products_sold.sort((a, b) => b.quantity - a.quantity);
+  for (const sellerStats of sellerStatsList) {
+    sellerStats.productsSold.sort((a, b) => b.quantity - a.quantity);
 
     const representation = {
-      seller_id: seller_stats.seller.id,
-      name: `${seller_stats.seller.first_name} ${seller_stats.seller.last_name}`,
-      revenue: +seller_stats.revenue.toFixed(2),
-      profit: +seller_stats.profit.toFixed(2),
-      sales_count: seller_stats.sales_count,
-      top_products: seller_stats.products_sold.slice(0, 10),
-      bonus: +seller_stats.bonus.toFixed(2),
+      sellerId: sellerStats.seller.id,
+      name: `${sellerStats.seller.firstName} ${sellerStats.seller.lastName}`,
+      revenue: +sellerStats.revenue.toFixed(2),
+      profit: +sellerStats.profit.toFixed(2),
+      salesCount: sellerStats.salesCount,
+      top_products: sellerStats.productsSold.slice(0, 10),
+      bonus: +sellerStats.bonus.toFixed(2),
     };
 
     representations.push(representation);
