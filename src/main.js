@@ -153,6 +153,8 @@ class GetSellerStatsView {
         if (!(item.sku in seller_stats.products_sold)) {
           seller_stats.products_sold[item.sku] = 0;
         }
+
+        seller_stats.products_sold[item.sku] += item.quantity;
       }
     }
 
@@ -317,6 +319,7 @@ function analyzeSalesData(data, options) {
 
   const representations = [];
   for (let seller_stats of seller_stats_list) {
+    console.log(seller_stats.products_sold);
     seller_stats.products_sold.sort((a, b) => b.quantity - a.quantity);
 
     const representation = {
@@ -324,7 +327,7 @@ function analyzeSalesData(data, options) {
       name: `${seller_stats.seller.first_name} ${seller_stats.seller.last_name}`,
       revenue: +seller_stats.revenue.toFixed(2),
       profit: +seller_stats.profit.toFixed(2),
-      quantity: seller_stats.sales_count,
+      sales_count: seller_stats.sales_count,
       top_products: seller_stats.products_sold.slice(0, 10),
       bonus: +seller_stats.bonus.toFixed(2),
     };
