@@ -323,11 +323,11 @@ function analyzeSalesData(data, options) {
     const representation = {
       seller_id: seller_stats.seller.id,
       name: `${seller_stats.seller.first_name} ${seller_stats.seller.last_name}`,
-      revenue: seller_stats.revenue,
-      profit: seller_stats.profit,
+      revenue: +seller_stats.revenue.toFixed(2),
+      profit: +seller_stats.profit.toFixed(2),
       sales_count: seller_stats.sales_count,
       top_products: seller_stats.products_sold.slice(0, 10),
-      bonus: seller_stats.bonus,
+      bonus: +seller_stats.bonus.toFixed(2),
     };
 
     representations.push(representation);
