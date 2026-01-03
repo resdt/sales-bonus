@@ -154,9 +154,8 @@ class GetSellerStatsView {
     }
 
     for (const [seller_id, stats] of Object.entries(seller_stats_map)) {
-      const products_sold = Object.entries(stats.products_sold);
-      products_sold.map(([key, value]) => ({ [key]: value }));
-      seller_stats_map[seller_id].products_sold = products_sold;
+      const entries = Object.entries(stats.products_sold);
+      seller_stats_map[seller_id].products_sold = entries;
     }
 
     return Object.values(seller_stats_map);
