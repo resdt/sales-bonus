@@ -319,7 +319,6 @@ function analyzeSalesData(data, options) {
 
   const representations = [];
   for (let seller_stats of seller_stats_list) {
-    console.log(seller_stats.products_sold);
     seller_stats.products_sold.sort((a, b) => b.quantity - a.quantity);
 
     const representation = {
