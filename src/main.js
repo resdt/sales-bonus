@@ -12,11 +12,12 @@ class OrderItem {
 }
 
 class OrderLine {
-  constructor({ receipt_id, seller_id, customer_id, items }) {
+  constructor({ receipt_id, seller_id, customer_id, items, total_amount }) {
     this.receipt_id = receipt_id;
     this.seller_id = seller_id;
     this.customer_id = customer_id;
     this.items = items;
+    this.total_amount = total_amount;
   }
 }
 
@@ -88,10 +89,8 @@ function calculateBonusByProfit(index, total, seller) {
     percentage = COMMON_BONUS_PERCENTAGE;
   }
 
-  const profitInCents = Math.round(seller.profit * 100);
-  const bonusInCents = Math.floor((profitInCents * percentage) / 100);
-
-  return bonusInCents / 100;
+  const profit = Math.round(((seller.profit * percentage) / 100) * 100) / 100;
+  return profit;
 }
 
 /**
@@ -103,10 +102,11 @@ function calculateBonusByProfit(index, total, seller) {
 function calculateSimpleRevenue(purchase, _product) {
   const { discount, sale_price, quantity } = purchase;
 
-  const priceInCents = Math.round(sale_price * 100);
-  const revenueInCents = (priceInCents * quantity * (100 - discount)) / 100;
+  const decimalDiscount = discount / 100;
+  const overallPrice = sale_price * quantity;
+  const revenue = overallPrice * (1 - decimalDiscount);
 
-  return Math.round(revenueInCents) / 100;
+  return revenue;
 }
 
 class GetSellerStatsView {
@@ -142,13 +142,13 @@ class GetSellerStatsView {
 
       const seller_stats = seller_stats_map[order_line.seller_id];
       seller_stats.sales_count++;
+      seller_stats.revenue += order_line.total_amount;
 
       const items = order_line.items;
       for (let item of items) {
         const revenue = this.#revenue_callback(item);
         const investments = products[item.sku].purchase_price * item.quantity;
 
-        seller_stats.revenue += revenue;
         seller_stats.profit += revenue - investments;
 
         if (!(item.sku in seller_stats.products_sold)) {
@@ -216,6 +216,7 @@ class MarketLocalDatabase extends IMarketRepository {
         seller_id: purchase_data.seller_id,
         customer_id: purchase_data.customer_id,
         items: item_list,
+        total_amount: purchase_data.total_amount,
       });
       purchases.push(purchase);
     }
@@ -332,6 +333,6 @@ function analyzeSalesData(data, options) {
 
     representations.push(representation);
   }
-  //
+
   return representations;
 }
