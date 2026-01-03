@@ -145,7 +145,11 @@ class GetSellerStatsView {
 
       const items = orderLine.items;
       for (const item of items) {
-        const revenue = this.#revenueCallback(item);
+        const revenue = this.#revenueCallback({
+          discount: item.discount,
+          sale_price: item.salePrice,
+          quantity: item.quantity,
+        });
         const investments = products[item.sku].purchasePrice * item.quantity;
 
         sellerStats.profit += revenue - investments;
