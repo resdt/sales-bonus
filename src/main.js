@@ -149,7 +149,7 @@ class GetSellerStatsView {
           seller_stats.products_sold[item.sku] = 0;
         }
 
-        seller_stats.products_sold[item.sku]++;
+        seller_stats.products_sold[item.sku] += item.quantity;
       }
     }
 
