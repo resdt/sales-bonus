@@ -56,11 +56,11 @@ class IMarketRepository {
 // ===------------------------------------------------------------------===
 
 class SellerStats {
-  constructor({ seller, revenue, profit, quantity, products_sold }) {
+  constructor({ seller, revenue, profit, sales_count, products_sold }) {
     this.seller = seller;
     this.revenue = revenue;
     this.profit = profit;
-    this.quantity = quantity;
+    this.sales_count = sales_count;
     this.products_sold = products_sold;
   }
 }
