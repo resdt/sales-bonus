@@ -101,8 +101,11 @@ function calculateBonusByProfit(index, total, seller) {
  */
 function calculateSimpleRevenue(purchase, _product) {
   const { discount, sale_price, quantity } = purchase;
-  const revenue = sale_price * 100 * quantity * (1 - discount / 100);
-  return revenue / 100;
+
+  const priceInCents = Math.round(sale_price * 100);
+  const revenueInCents = (priceInCents * quantity * (100 - discount)) / 100;
+
+  return Math.round(revenueInCents) / 100;
 }
 
 class GetSellerStatsView {
@@ -142,15 +145,14 @@ class GetSellerStatsView {
       const items = order_line.items;
       for (let item of items) {
         const revenue = this.#revenue_callback(item);
+        const investments = products[item.sku].purchase_price * item.quantity;
+
         seller_stats.revenue += revenue;
-        seller_stats.profit +=
-          revenue - products[item.sku].purchase_price * item.quantity;
+        seller_stats.profit += revenue - investments;
 
         if (!(item.sku in seller_stats.products_sold)) {
           seller_stats.products_sold[item.sku] = 0;
         }
-
-        seller_stats.products_sold[item.sku] += item.quantity;
       }
     }
 
