@@ -101,7 +101,8 @@ function calculateBonusByProfit(index, total, seller) {
  */
 function calculateSimpleRevenue(purchase, _product) {
   const { discount, sale_price, quantity } = purchase;
-  return sale_price * quantity * (1 - discount / 100);
+  const revenue = sale_price * 100 * quantity * (1 - discount / 100);
+  return revenue / 100;
 }
 
 class GetSellerStatsView {
